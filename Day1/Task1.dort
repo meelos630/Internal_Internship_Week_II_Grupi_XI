@@ -1,0 +1,195 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const ProfileCardApp());
+}
+
+class ProfileCardApp extends StatelessWidget {
+  const ProfileCardApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Profile Card App',
+      debugShowCheckedModeBanner: false,
+      home: const ProfileCardScreen(),
+    );
+  }
+}
+
+class ProfileCardScreen extends StatefulWidget {
+  const ProfileCardScreen({super.key});
+
+  @override
+  State<ProfileCardScreen> createState() => _ProfileCardScreenState();
+}
+
+class _ProfileCardScreenState extends State<ProfileCardScreen> {
+  String profileStatus = 'Available for Flutter projects';
+
+  void changeProfileStatus() {
+    setState(() {
+      profileStatus = 'Profile viewed successfully!';
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('You clicked the profile button.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double cardWidth = screenWidth > 600 ? 450 : screenWidth * 0.9;
+
+    return Scaffold(
+      backgroundColor: Colors.blueGrey.shade50,
+      appBar: AppBar(
+        title: const Text('Profile Card App'),
+        centerTitle: true,
+        backgroundColor: Colors.blueGrey,
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Card(
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Container(
+              width: cardWidth,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircleAvatar(
+                    radius: 55,
+                    backgroundColor: Colors.blueGrey,
+                    child: Icon(
+                      Icons.person,
+                      size: 65,
+                      color: Colors.white,
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    'Trim Rexhepi',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  const Text(
+                    'Flutter Intern',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.blueGrey,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    'I am learning Dart and Flutter during the internal internship. This app shows a simple professional profile using basic Flutter widgets.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      height: 1.4,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  const SizedBox(height: 22),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        Icons.school,
+                        color: Colors.blueGrey,
+                      ),
+                      SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'British Gymnasium of Technology',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        Icons.code,
+                        color: Colors.blueGrey,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Dart & Flutter',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 22),
+
+                  Text(
+                    profileStatus,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  ElevatedButton(
+                    onPressed: changeProfileStatus,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueGrey,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text(
+                      'View Profile',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
