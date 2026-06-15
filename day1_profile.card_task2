@@ -1,0 +1,202 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const GradeCalculatorApp());
+}
+
+class GradeCalculatorApp extends StatelessWidget {
+  const GradeCalculatorApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Grade Calculator UI',
+      home: const GradeCalculatorPage(),
+    );
+  }
+}
+
+class GradeCalculatorPage extends StatefulWidget {
+  const GradeCalculatorPage({super.key});
+
+  @override
+  State<GradeCalculatorPage> createState() => _GradeCalculatorPageState();
+}
+
+class _GradeCalculatorPageState extends State<GradeCalculatorPage> {
+  final TextEditingController grade1Controller = TextEditingController();
+  final TextEditingController grade2Controller = TextEditingController();
+  final TextEditingController grade3Controller = TextEditingController();
+
+  String resultText = 'Enter three grades to calculate the average.';
+  String statusText = '';
+
+  void calculateAverage() {
+    String grade1Text = grade1Controller.text.trim();
+    String grade2Text = grade2Controller.text.trim();
+    String grade3Text = grade3Controller.text.trim();
+
+    if (grade1Text.isEmpty || grade2Text.isEmpty || grade3Text.isEmpty) {
+      setState(() {
+        resultText = 'Please fill in all three fields.';
+        statusText = '';
+      });
+      return;
+    }
+
+    double? grade1 = double.tryParse(grade1Text);
+    double? grade2 = double.tryParse(grade2Text);
+    double? grade3 = double.tryParse(grade3Text);
+
+    if (grade1 == null || grade2 == null || grade3 == null) {
+      setState(() {
+        resultText = 'Please enter only valid numbers.';
+        statusText = '';
+      });
+      return;
+    }
+
+    double average = (grade1 + grade2 + grade3) / 3;
+
+    setState(() {
+      resultText = 'Average: ${average.toStringAsFixed(2)}';
+
+      if (average >= 50) {
+        statusText = 'Status: Kalon';
+      } else {
+        statusText = 'Status: Duhet përmirësim';
+      }
+    });
+  }
+
+  void clearFields() {
+    grade1Controller.clear();
+    grade2Controller.clear();
+    grade3Controller.clear();
+
+    setState(() {
+      resultText = 'Enter three grades to calculate the average.';
+      statusText = '';
+    });
+  }
+
+  @override
+  void dispose() {
+    grade1Controller.dispose();
+    grade2Controller.dispose();
+    grade3Controller.dispose();
+    super.dispose();
+  }
+
+  Widget buildGradeField(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          prefixIcon: const Icon(Icons.grade),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.blueGrey[50],
+      appBar: AppBar(
+        title: const Text('Day 1 - Grade Calculator'),
+        backgroundColor: Colors.blueGrey,
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Container(
+            width: 360,
+            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(
+                  blurRadius: 10,
+                  color: Colors.black26,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.calculate,
+                  size: 60,
+                  color: Colors.blueGrey,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Grade Calculator',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Enter three grades or points to calculate the average.',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+
+                buildGradeField('Grade 1', grade1Controller),
+                buildGradeField('Grade 2', grade2Controller),
+                buildGradeField('Grade 3', grade3Controller),
+
+                const SizedBox(height: 10),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: calculateAverage,
+                        child: const Text('Calculate'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: clearFields,
+                        child: const Text('Clear'),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                Text(
+                  resultText,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 18),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  statusText,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueGrey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
