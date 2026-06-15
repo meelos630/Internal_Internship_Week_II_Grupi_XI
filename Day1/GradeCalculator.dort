@@ -1,0 +1,286 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const GradeCalculatorApp());
+}
+
+class GradeCalculatorApp extends StatelessWidget {
+  const GradeCalculatorApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Grade Calculator UI',
+      debugShowCheckedModeBanner: false,
+      home: const GradeCalculatorScreen(),
+    );
+  }
+}
+
+class GradeCalculatorScreen extends StatefulWidget {
+  const GradeCalculatorScreen({super.key});
+
+  @override
+  State<GradeCalculatorScreen> createState() => _GradeCalculatorScreenState();
+}
+
+class _GradeCalculatorScreenState extends State<GradeCalculatorScreen> {
+  final TextEditingController gradeOneController = TextEditingController();
+  final TextEditingController gradeTwoController = TextEditingController();
+  final TextEditingController gradeThreeController = TextEditingController();
+
+  String resultText = 'Enter three grades to calculate the average.';
+  String statusText = '';
+
+  void calculateAverage() {
+    String gradeOneText = gradeOneController.text.trim();
+    String gradeTwoText = gradeTwoController.text.trim();
+    String gradeThreeText = gradeThreeController.text.trim();
+
+    if (gradeOneText.isEmpty ||
+        gradeTwoText.isEmpty ||
+        gradeThreeText.isEmpty) {
+      setState(() {
+        resultText = 'Please fill in all fields.';
+        statusText = '';
+      });
+      return;
+    }
+
+    double? gradeOne = double.tryParse(gradeOneText);
+    double? gradeTwo = double.tryParse(gradeTwoText);
+    double? gradeThree = double.tryParse(gradeThreeText);
+
+    if (gradeOne == null || gradeTwo == null || gradeThree == null) {
+      setState(() {
+        resultText = 'Please enter only valid numbers.';
+        statusText = '';
+      });
+      return;
+    }
+
+    double average = (gradeOne + gradeTwo + gradeThree) / 3;
+
+    setState(() {
+      resultText = 'Average: ${average.toStringAsFixed(2)}';
+
+      if (average >= 50) {
+        statusText = 'Status: Kalon';
+      } else {
+        statusText = 'Status: Duhet permiresim';
+      }
+    });
+  }
+
+  void clearFields() {
+    gradeOneController.clear();
+    gradeTwoController.clear();
+    gradeThreeController.clear();
+
+    setState(() {
+      resultText = 'Enter three grades to calculate the average.';
+      statusText = '';
+    });
+  }
+
+  @override
+  void dispose() {
+    gradeOneController.dispose();
+    gradeTwoController.dispose();
+    gradeThreeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double cardWidth = screenWidth > 600 ? 460 : screenWidth * 0.9;
+
+    return Scaffold(
+      backgroundColor: Colors.blueGrey.shade50,
+      appBar: AppBar(
+        title: const Text('Grade Calculator UI'),
+        centerTitle: true,
+        backgroundColor: Colors.blueGrey,
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Card(
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: Container(
+                width: cardWidth,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.calculate,
+                      size: 70,
+                      color: Colors.blueGrey,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    const Text(
+                      'Grade Calculator',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    const Text(
+                      'Enter three grades or points and calculate the average.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    TextField(
+                      controller: gradeOneController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Grade 1',
+                        prefixIcon: const Icon(Icons.looks_one),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    TextField(
+                      controller: gradeTwoController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Grade 2',
+                        prefixIcon: const Icon(Icons.looks_two),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    TextField(
+                      controller: gradeThreeController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Grade 3',
+                        prefixIcon: const Icon(Icons.looks_3),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: calculateAverage,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueGrey,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Text(
+                              'Calculate',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: clearFields,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.blueGrey,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: const BorderSide(color: Colors.blueGrey),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Text(
+                              'Clear',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.blueGrey.shade50,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.blueGrey.shade100),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            resultText,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          Text(
+                            statusText,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: statusText.contains('Kalon')
+                                  ? Colors.green
+                                  : Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
