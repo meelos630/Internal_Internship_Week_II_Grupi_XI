@@ -1,0 +1,426 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MiniQuizApp());
+}
+
+class Question {
+  final String questionText;
+  final List<String> answers;
+  final int correctAnswerIndex;
+
+  Question({
+    required this.questionText,
+    required this.answers,
+    required this.correctAnswerIndex,
+  });
+}
+
+class MiniQuizApp extends StatelessWidget {
+  const MiniQuizApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Day 3 Mini Quiz App',
+      theme: ThemeData(
+        primarySwatch: Colors.blueGrey,
+      ),
+      home: const QuizScreen(),
+    );
+  }
+}
+
+class QuizScreen extends StatefulWidget {
+  const QuizScreen({super.key});
+
+  @override
+  State<QuizScreen> createState() => _QuizScreenState();
+}
+
+class _QuizScreenState extends State<QuizScreen> {
+  int currentQuestionIndex = 0;
+  int score = 0;
+
+  final List<Question> questions = [
+    Question(
+      questionText: 'What is Flutter?',
+      answers: [
+        'A database',
+        'A framework for building apps',
+        'A programming language',
+        'An operating system',
+      ],
+      correctAnswerIndex: 1,
+    ),
+    Question(
+      questionText: 'What does setState() do?',
+      answers: [
+        'Deletes the app',
+        'Refreshes the UI when data changes',
+        'Creates a database',
+        'Opens GitHub',
+      ],
+      correctAnswerIndex: 1,
+    ),
+    Question(
+      questionText: 'What does Navigator.push() do?',
+      answers: [
+        'Goes back',
+        'Opens a new screen',
+        'Deletes a widget',
+        'Creates a variable',
+      ],
+      correctAnswerIndex: 1,
+    ),
+    Question(
+      questionText: 'What is a Model Class used for?',
+      answers: [
+        'To organize data',
+        'To display icons',
+        'To restart the app',
+        'To create colors',
+      ],
+      correctAnswerIndex: 0,
+    ),
+    Question(
+      questionText: 'What does SnackBar show?',
+      answers: [
+        'A temporary message',
+        'A full new app',
+        'A database table',
+        'A password field',
+      ],
+      correctAnswerIndex: 0,
+    ),
+  ];
+
+  void checkAnswer(int selectedIndex) {
+    bool isCorrect =
+        selectedIndex == questions[currentQuestionIndex].correctAnswerIndex;
+
+    if (isCorrect) {
+      score++;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Correct answer!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Wrong answer!')),
+      );
+    }
+
+    setState(() {
+      if (currentQuestionIndex < questions.length - 1) {
+        currentQuestionIndex++;
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResultScreen(
+              score: score,
+              totalQuestions: questions.length,
+              onRestart: restartQuiz,
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  void restartQuiz() {
+    setState(() {
+      currentQuestionIndex = 0;
+      score = 0;
+    });
+  }
+
+  void showQuestionDetails() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailsScreen(
+          question: questions[currentQuestionIndex],
+        ),
+      ),
+    );
+  }
+
+  void confirmRestart() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Restart Quiz'),
+          content: const Text('Are you sure you want to restart the quiz?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                restartQuiz();
+              },
+              child: const Text('Restart'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Question currentQuestion = questions[currentQuestionIndex];
+
+    return Scaffold(
+      backgroundColor: Colors.blueGrey[50],
+      appBar: AppBar(
+        title: const Text('Day 3 - Mini Quiz App'),
+        backgroundColor: Colors.blueGrey,
+        actions: [
+          IconButton(
+            onPressed: confirmRestart,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Container(
+            width: 380,
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(
+                  blurRadius: 10,
+                  color: Colors.black26,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Question ${currentQuestionIndex + 1} of ${questions.length}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.blueGrey,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  currentQuestion.questionText,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                for (int i = 0; i < currentQuestion.answers.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          checkAnswer(i);
+                        },
+                        child: Text(currentQuestion.answers[i]),
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 12),
+
+                OutlinedButton.icon(
+                  onPressed: showQuestionDetails,
+                  icon: const Icon(Icons.info),
+                  label: const Text('View Question Details'),
+                ),
+
+                const SizedBox(height: 16),
+
+                Text(
+                  'Current Score: $score',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueGrey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DetailsScreen extends StatelessWidget {
+  final Question question;
+
+  const DetailsScreen({
+    super.key,
+    required this.question,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Question Details'),
+        backgroundColor: Colors.blueGrey,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Card(
+          elevation: 4,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.quiz,
+                  size: 60,
+                  color: Colors.blueGrey,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  question.questionText,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Available Answers:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+
+                for (String answer in question.answers)
+                  ListTile(
+                    leading: const Icon(Icons.circle, size: 12),
+                    title: Text(answer),
+                  ),
+
+                const SizedBox(height: 10),
+
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Back'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ResultScreen extends StatelessWidget {
+  final int score;
+  final int totalQuestions;
+  final VoidCallback onRestart;
+
+  const ResultScreen({
+    super.key,
+    required this.score,
+    required this.totalQuestions,
+    required this.onRestart,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    String message;
+
+    if (score >= 4) {
+      message = 'Excellent!';
+    } else if (score >= 3) {
+      message = 'Good job!';
+    } else {
+      message = 'You should practice more.';
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.blueGrey[50],
+      appBar: AppBar(
+        title: const Text('Quiz Result'),
+        backgroundColor: Colors.blueGrey,
+      ),
+      body: Center(
+        child: Container(
+          width: 350,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                blurRadius: 10,
+                color: Colors.black26,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.emoji_events,
+                size: 70,
+                color: Colors.blueGrey,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Quiz Finished!',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Score: $score / $totalQuestions',
+                style: const TextStyle(fontSize: 22),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                message,
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.blueGrey,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  onRestart();
+                  Navigator.pop(context);
+                },
+                child: const Text('Restart Quiz'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
