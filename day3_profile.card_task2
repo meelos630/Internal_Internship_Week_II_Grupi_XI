@@ -1,0 +1,214 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const TaskTrackerApp());
+}
+
+class TaskItem {
+  String title;
+  bool done;
+
+  TaskItem({
+    required this.title,
+    this.done = false,
+  });
+}
+
+class TaskTrackerApp extends StatelessWidget {
+  const TaskTrackerApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Task Tracker',
+      theme: ThemeData(
+        primarySwatch: Colors.blueGrey,
+      ),
+      home: const TaskTrackerScreen(),
+    );
+  }
+}
+
+class TaskTrackerScreen extends StatefulWidget {
+  const TaskTrackerScreen({super.key});
+
+  @override
+  State<TaskTrackerScreen> createState() => _TaskTrackerScreenState();
+}
+
+class _TaskTrackerScreenState extends State<TaskTrackerScreen> {
+  final List<TaskItem> tasks = [];
+
+  final TextEditingController controller = TextEditingController();
+
+  void addTask() {
+    String text = controller.text.trim();
+
+    if (text.isEmpty) return;
+
+    setState(() {
+      tasks.add(TaskItem(title: text));
+    });
+
+    controller.clear();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Task Added'),
+      ),
+    );
+  }
+
+  void deleteTask(int index) {
+    String taskName = tasks[index].title;
+
+    setState(() {
+      tasks.removeAt(index);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$taskName Deleted'),
+      ),
+    );
+  }
+
+  void toggleTask(int index) {
+    setState(() {
+      tasks[index].done = !tasks[index].done;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          tasks[index].done
+              ? 'Task Marked Completed'
+              : 'Task Marked Active',
+        ),
+      ),
+    );
+  }
+
+  int get completedTasks =>
+      tasks.where((task) => task.done).length;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Day 3 - Task Tracker'),
+      ),
+
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+
+        child: Column(
+          children: [
+
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: 'Enter Task',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: addTask,
+                child: const Text('Add Task'),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    Text(
+                      'Total Tasks: ${tasks.length}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      'Completed Tasks: $completedTasks',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            Expanded(
+              child: tasks.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No tasks yet',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: tasks.length,
+
+                      itemBuilder: (context, index) {
+                        final task = tasks[index];
+
+                        return Card(
+                          child: ListTile(
+                            leading: Checkbox(
+                              value: task.done,
+                              onChanged: (_) {
+                                toggleTask(index);
+                              },
+                            ),
+
+                            title: Text(
+                              task.title,
+                              style: TextStyle(
+                                decoration: task.done
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                              ),
+                            ),
+
+                            subtitle: Text(
+                              task.done
+                                  ? 'Completed'
+                                  : 'Active',
+                            ),
+
+                            trailing: IconButton(
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                              ),
+                              onPressed: () {
+                                deleteTask(index);
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
