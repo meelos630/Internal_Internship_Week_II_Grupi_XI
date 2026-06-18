@@ -1,0 +1,211 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const TrackerApp());
+}
+
+class TrackerItem {
+  String title;
+  bool done;
+
+  TrackerItem({
+    required this.title,
+    this.done = false,
+  });
+}
+
+class TrackerApp extends StatelessWidget {
+  const TrackerApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Day 3 Tracker',
+      home: const TrackerScreen(),
+    );
+  }
+}
+
+class TrackerScreen extends StatefulWidget {
+  const TrackerScreen({super.key});
+
+  @override
+  State<TrackerScreen> createState() => _TrackerScreenState();
+}
+
+class _TrackerScreenState extends State<TrackerScreen> {
+  final TextEditingController itemController = TextEditingController();
+
+  final List<TrackerItem> items = [];
+
+  void addItem() {
+    String title = itemController.text.trim();
+
+    if (title.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter an item')),
+      );
+      return;
+    }
+
+    setState(() {
+      items.add(TrackerItem(title: title, done: false));
+    });
+
+    itemController.clear();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Item added successfully')),
+    );
+  }
+
+  void toggleStatus(int index) {
+    setState(() {
+      items[index].done = !items[index].done;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          items[index].done ? 'Item marked as done' : 'Item marked as active',
+        ),
+      ),
+    );
+  }
+
+  void deleteItem(int index) {
+    String deletedTitle = items[index].title;
+
+    setState(() {
+      items.removeAt(index);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$deletedTitle deleted')),
+    );
+  }
+
+  int get doneCount {
+    return items.where((item) => item.done).length;
+  }
+
+  int get activeCount {
+    return items.where((item) => !item.done).length;
+  }
+
+  @override
+  void dispose() {
+    itemController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.blueGrey[50],
+      appBar: AppBar(
+        title: const Text('Day 3 - Task Tracker'),
+        backgroundColor: Colors.blueGrey,
+      ),
+      body: Center(
+        child: Container(
+          width: 430,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              TextField(
+                controller: itemController,
+                decoration: const InputDecoration(
+                  labelText: 'Enter task or expense',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.add_task),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: addItem,
+                  child: const Text('Add Item'),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Total Items: ${items.length}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text('Done: $doneCount'),
+                      Text('Active: $activeCount'),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              Expanded(
+                child: items.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No items added yet',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: items.length,
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+
+                          return Card(
+                            child: ListTile(
+                              leading: Checkbox(
+                                value: item.done,
+                                onChanged: (_) {
+                                  toggleStatus(index);
+                                },
+                              ),
+                              title: Text(
+                                item.title,
+                                style: TextStyle(
+                                  decoration: item.done
+                                      ? TextDecoration.lineThrough
+                                      : TextDecoration.none,
+                                ),
+                              ),
+                              subtitle: Text(
+                                item.done ? 'Status: Done' : 'Status: Active',
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () {
+                                  deleteItem(index);
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
