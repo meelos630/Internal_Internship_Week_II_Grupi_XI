@@ -1,0 +1,178 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class Product {
+  final String name;
+  final String category;
+  final double price;
+  final IconData icon;
+
+  Product({
+    required this.name,
+    required this.category,
+    required this.price,
+    required this.icon,
+  });
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ProductCatalogPage(),
+    );
+  }
+}
+
+class ProductCatalogPage extends StatefulWidget {
+  const ProductCatalogPage({super.key});
+
+  @override
+  State<ProductCatalogPage> createState() => _ProductCatalogPageState();
+}
+
+class _ProductCatalogPageState extends State<ProductCatalogPage> {
+  final List<Product> products = [
+    Product(
+      name: "Laptop",
+      category: "Electronics",
+      price: 799,
+      icon: Icons.laptop,
+    ),
+    Product(
+      name: "Phone",
+      category: "Electronics",
+      price: 599,
+      icon: Icons.phone_android,
+    ),
+    Product(
+      name: "Shoes",
+      category: "Fashion",
+      price: 89,
+      icon: Icons.shopping_bag,
+    ),
+    Product(
+      name: "T-Shirt",
+      category: "Fashion",
+      price: 25,
+      icon: Icons.checkroom,
+    ),
+    Product(
+      name: "Burger",
+      category: "Food",
+      price: 8,
+      icon: Icons.fastfood,
+    ),
+    Product(
+      name: "Pizza",
+      category: "Food",
+      price: 12,
+      icon: Icons.local_pizza,
+    ),
+  ];
+
+  String searchText = "";
+
+  @override
+  Widget build(BuildContext context) {
+    List<Product> filteredProducts =
+        products.where((product) {
+          return product.name.toLowerCase().contains(
+            searchText.toLowerCase(),
+          );
+        }).toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Product Catalog"),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: "Search product...",
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchText = value;
+                });
+              },
+            ),
+          ),
+
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+
+                if (constraints.maxWidth > 600) {
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(10),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      childAspectRatio: 1.2,
+                    ),
+                    itemCount: filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      return ProductCard(
+                        product: filteredProducts[index],
+                      );
+                    },
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: filteredProducts.length,
+                  itemBuilder: (context, index) {
+                    return ProductCard(
+                      product: filteredProducts[index],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ProductCard extends StatelessWidget {
+  final Product product;
+
+  const ProductCard({
+    super.key,
+    required this.product,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.all(10),
+      elevation: 4,
+      child: ListTile(
+        leading: Icon(
+          product.icon,
+          size: 40,
+          color: Colors.blue,
+        ),
+        title: Text(product.name),
+        subtitle: Text(
+          "${product.category}\n\$${product.price}",
+        ),
+      ),
+    );
+  }
+}
