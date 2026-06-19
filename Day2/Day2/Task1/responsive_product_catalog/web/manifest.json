@@ -1,0 +1,9 @@
+{
+  "name": "Responsive Product Catalog",
+  "short_name": "Catalog",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#F6F8FA",
+  "theme_color": "#256D85",
+  "description": "A responsive Flutter product catalog for Internal Internship Day 2 Task 1."
+}
