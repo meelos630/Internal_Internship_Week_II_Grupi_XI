@@ -1,0 +1,146 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+void main() {
+  runApp(const MyApp());
+}
+
+class Post {
+  final int id;
+  final String title;
+  final String body;
+
+  Post({
+    required this.id,
+    required this.title,
+    required this.body,
+  });
+
+  factory Post.fromJson(Map<String, dynamic> json) {
+    return Post(
+      id: json['id'],
+      title: json['title'],
+      body: json['body'],
+    );
+  }
+}
+
+class ApiService {
+  static Future<List<Post>> fetchPosts() async {
+    final url = Uri.parse('https://jsonplaceholder.typicode.com/posts');
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+
+      return data.map((item) {
+        return Post.fromJson(item);
+      }).toList();
+    } else {
+      throw Exception('Failed to load posts');
+    }
+  }
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ApiExplorerPage(),
+    );
+  }
+}
+
+class ApiExplorerPage extends StatefulWidget {
+  const ApiExplorerPage({super.key});
+
+  @override
+  State<ApiExplorerPage> createState() => _ApiExplorerPageState();
+}
+
+class _ApiExplorerPageState extends State<ApiExplorerPage> {
+  late Future<List<Post>> postsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    postsFuture = ApiService.fetchPosts();
+  }
+
+  void refreshPosts() {
+    setState(() {
+      postsFuture = ApiService.fetchPosts();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Day 4 API Explorer'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: refreshPosts,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
+      body: FutureBuilder<List<Post>>(
+        future: postsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: const TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text('No posts found'),
+            );
+          }
+
+          final posts = snapshot.data!;
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: posts.length,
+            itemBuilder: (context, index) {
+              final post = posts[index];
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    child: Text(post.id.toString()),
+                  ),
+                  title: Text(
+                    post.title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(post.body),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
